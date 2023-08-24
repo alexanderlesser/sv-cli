@@ -17,7 +17,7 @@ type Record struct {
 	Entries  []Entry `json:"entries"`
 }
 
-type CssFile struct {
+type File struct {
 	Name string
 	Path string
 }
