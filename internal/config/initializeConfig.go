@@ -57,6 +57,7 @@ func generateRandomKey(length int) string {
 	return result.String()
 }
 
+// Creates or load config file
 func InitializeConfig() {
 	done := make(chan bool)
 
@@ -75,6 +76,11 @@ func InitializeConfig() {
 			// Generate and store the encryption key
 			encryptionKey := generateRandomKey(24)
 			viper.Set(constants.ENCRYPTION_KEY_NAME, encryptionKey)
+
+			viper.Set(constants.CONFIG_CSS_NAME, "assets/css")
+			viper.Set(constants.CONFIG_JS_NAME, "src/js")
+			viper.Set(constants.CONFIG_MINIFIED_CSS_NAME, false)
+			viper.Set(constants.CONFIG_MINIFIED_JS_NAME, false)
 
 			// Generate and store the encryption bytes
 			encryptionBytes, err := generateRandomBytes(16)
