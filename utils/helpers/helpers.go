@@ -110,6 +110,51 @@ func GetJSFiles(p string) ([]types.File, error) {
 	return jsFiles, nil
 }
 
+func GetCSSPath(p string) (string, error) {
+	cssPath := viper.GetString(constants.CONFIG_CSS_NAME)
+	// onlyMinified := viper.GetBool(constants.CONFIG_MINIFIED_CSS_NAME)
+	// Check if path exists in the path
+	fullPath := filepath.Join(p, cssPath)
+	_, err := os.Stat(fullPath)
+	if err != nil {
+		return "", err
+	}
+
+	return fullPath, nil
+}
+
+func GetJSPath(p string) (string, error) {
+	jsPath := viper.GetString(constants.CONFIG_JS_NAME)
+	// onlyMinified := viper.GetBool(constants.CONFIG_MINIFIED_CSS_NAME)
+	// Check if path exists in the path
+	fullPath := filepath.Join(p, jsPath)
+	_, err := os.Stat(fullPath)
+	if err != nil {
+		return "", err
+	}
+
+	return fullPath, nil
+}
+
+func IsCssFile(f types.File) bool {
+	minCss := viper.GetBool(constants.CONFIG_MINIFIED_CSS_NAME)
+
+	if strings.HasSuffix(f.Name, ".css") {
+
+		if minCss {
+			if strings.Contains(f.Name, ".min") {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		return true
+	}
+
+	return false
+}
+
 func DeployFile(record types.Record, file types.File) (types.DeploySuccess, error) {
 	username := record.Username
 	password, err := encrypt.DecryptPassword(record.Password)

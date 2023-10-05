@@ -1,9 +1,14 @@
 package components
 
 import (
+	"fmt"
+	"io"
 	"log"
 	"os"
+	"os/exec"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 	"time"
 
 	"github.com/alexanderlesser/sv-cli/types"
@@ -180,6 +185,20 @@ func setDeployText(app *tview.Application, s string, file types.File, record typ
 	})
 }
 
+func generateTextView(app *tview.Application) *tview.TextView {
+
+	textView := tview.NewTextView().
+		SetDynamicColors(true).
+		SetRegions(true).
+		SetChangedFunc(func() {
+			app.Draw()
+		})
+
+	textView.SetBorder(true)
+
+	return textView
+}
+
 func GenerateGrid(app *tview.Application, grid *tview.Grid, record types.Record, files []types.File, js bool) {
 	tabIndex := 0
 
@@ -255,13 +274,14 @@ func GenerateGrid(app *tview.Application, grid *tview.Grid, record types.Record,
 		}()
 	})
 
-	treeView := generateTreeView(record.Path)
-
 	grid.SetRows(3, 0, 3).
 		SetColumns(30, 0, 30).
 		SetBorders(true)
 
-	rightMenu := treeView
+	txtView := generateTextView(app)
+	go runGulp(app, record.Path, txtView)
+
+	rightMenu := txtView
 	leftMenu := list
 	header := newPrimitive("\n" + record.Name)
 	main := entryTable
@@ -306,4 +326,72 @@ func GenerateGrid(app *tview.Application, grid *tview.Grid, record types.Record,
 		AddItem(newPrimitive("Foot 1"), 2, 4, 1, 2, 1, 1, false)
 
 	app.SetFocus(&leftMenu)
+}
+
+func runGulp(app *tview.Application, path string, textView *tview.TextView) {
+	// Get the absolute path of the provided directory
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		app.Stop()
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+
+	// Change working directory
+	err = os.Chdir(absPath)
+	if err != nil {
+		app.Stop()
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+
+	// Create a pipe to capture the command output
+	pr, pw := io.Pipe()
+
+	// Run "gulp watch" command
+	cmd := exec.Command("gulp", "watch")
+	cmd.Stdout = pw // Use the write end of the pipe as stdout
+	cmd.Stderr = pw // Use the write end of the pipe as stderr
+
+	// Start the command but don't wait for it to finish
+	err = cmd.Start()
+	if err != nil {
+		app.Stop()
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+
+	go func() {
+		defer pw.Close() // Close the write end when done reading
+
+		buf := make([]byte, 4096)
+		for {
+			n, err := pr.Read(buf)
+			if n > 0 {
+				fmt.Fprintf(textView, "%s ", buf[:n])
+			}
+			if err != nil {
+				if err != io.EOF {
+					fmt.Println("Error reading output:", err)
+				}
+				// break
+			}
+		}
+	}()
+
+	// Wait for a termination signal
+	terminateSignal := make(chan os.Signal, 1)
+	signal.Notify(terminateSignal, os.Interrupt, syscall.SIGTERM)
+	<-terminateSignal
+
+	// Terminate the command
+	err = cmd.Process.Kill()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
+	message := "\nGulp watch command terminated"
+	app.QueueUpdateDraw(func() {
+		fmt.Fprintf(textView, "%s ", message)
+	})
 }

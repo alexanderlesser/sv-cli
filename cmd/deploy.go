@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/alexanderlesser/sv-cli/datastore"
 	"github.com/alexanderlesser/sv-cli/internal/components"
 	"github.com/alexanderlesser/sv-cli/types"
@@ -29,6 +30,19 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		deployJs, _ := cmd.Flags().GetBool("js")
 
+		var startGulp bool
+
+		prompt := &survey.Confirm{
+			Message: "Do you want to start Gulp?",
+			Default: false,
+		}
+
+		err := survey.AskOne(prompt, &startGulp)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+
 		records, err := datastore.Load()
 		if err != nil {
 			fmt.Println("Cannot load records: ", err)
@@ -46,6 +60,7 @@ to quickly create a Cobra application.`,
 			}
 		}, func(row, column int) {
 			record := records[row-1]
+
 			var files []types.File
 			if deployJs {
 				f, err := helpers.GetJSFiles(record.Path)
