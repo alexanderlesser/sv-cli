@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -44,6 +45,23 @@ var watchCmd = &cobra.Command{
 	
 	For more information about a specific command run record [command] -h`,
 	Run: func(cmd *cobra.Command, args []string) {
+		deployJs, _ := cmd.Flags().GetBool("js")
+		watchFile, _ := cmd.Flags().GetString("name")
+
+		if watchFile != "" {
+			if deployJs {
+				if !strings.HasSuffix(watchFile, ".js") {
+					fmt.Println("file needs suffix .js")
+					os.Exit(1)
+
+				}
+			} else {
+				if !strings.HasSuffix(watchFile, ".css") {
+					fmt.Println("file needs suffix .css")
+					os.Exit(1)
+				}
+			}
+		}
 
 		records, err := datastore.Load()
 		if err != nil {
@@ -73,7 +91,7 @@ var watchCmd = &cobra.Command{
 			pages.AddPage("view", textView, true, false)
 			pages.SwitchToPage("view")
 
-			go startGulp(app, textView, record)
+			go startGulp(app, textView, record, deployJs, watchFile)
 
 		})
 
@@ -87,18 +105,15 @@ var watchCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(watchCmd)
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// recordCmd.PersistentFlags().String("foo", "", "A help for foo")
+	watchCmd.Flags().BoolP("js", "j", false, "Deploy javascript files")
+	watchCmd.PersistentFlags().String("name", "", "Specific file to watch")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// recordCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func startGulp(app *tview.Application, textView *tview.TextView, record types.Record) {
+func startGulp(app *tview.Application, textView *tview.TextView, record types.Record, js bool, watchFile string) {
 	// Get the absolute path of the provided directory
 	absPath, err := filepath.Abs(record.Path)
 	if err != nil {
@@ -144,7 +159,7 @@ func startGulp(app *tview.Application, textView *tview.TextView, record types.Re
 
 				if strings.Contains(string(buf[:n]), "Serving files from: assets/") {
 					initialStartup = false
-					go watcher(app, textView, record)
+					go watcher(app, textView, record, js, watchFile)
 				}
 
 			}
@@ -174,16 +189,40 @@ func startGulp(app *tview.Application, textView *tview.TextView, record types.Re
 	})
 }
 
-func watcher(app *tview.Application, textView *tview.TextView, record types.Record) {
+func watcher(app *tview.Application, textView *tview.TextView, record types.Record, js bool, watchFile string) {
 	fmt.Fprintf(textView, "%s ", "--------------------------------------\n")
 	fmt.Fprintf(textView, "%s ", "Starting watcher...")
+	var path string
 
-	path, err := helpers.GetCSSPath(record.Path)
+	if js {
+		jsPath, err := helpers.GetJSPath(record.Path)
+		if err != nil {
+			app.Stop()
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Fprintf(textView, "%s ", "\nwatching: "+jsPath)
+		if watchFile != "" {
+			path = jsPath + "/" + watchFile
+		} else {
+			path = jsPath
+		}
 
-	if err != nil {
-		app.Stop()
-		fmt.Println(err)
-		os.Exit(1)
+	} else {
+		cssPath, err := helpers.GetCSSPath(record.Path)
+		if err != nil {
+			app.Stop()
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		if watchFile != "" {
+			path = cssPath + "/" + watchFile
+		} else {
+			path = cssPath
+		}
+
+		fmt.Fprintf(textView, "%s ", "\nwatching: "+cssPath)
 	}
 
 	// Create new watcher.
@@ -216,8 +255,19 @@ func watcher(app *tview.Application, textView *tview.TextView, record types.Reco
 						os.Exit(1)
 					}
 
-					isCss := helpers.IsCssFile(file)
-					if isCss {
+					var isCorrectType bool
+
+					if js {
+						fmt.Fprintf(textView, "%s ", "\nname: "+file.Name)
+						isCorrectType = helpers.IsJsFile(file)
+						fmt.Fprintf(textView, "%s ", strconv.FormatBool(isCorrectType))
+					} else {
+						isCorrectType = helpers.IsCssFile(file)
+						fmt.Fprintf(textView, "%s ", "\nname: "+file.Name)
+						fmt.Fprintf(textView, "%s ", strconv.FormatBool(isCorrectType))
+					}
+
+					if isCorrectType {
 						e := checkContentMatch(file, content)
 
 						if !e {

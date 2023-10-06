@@ -155,6 +155,25 @@ func IsCssFile(f types.File) bool {
 	return false
 }
 
+func IsJsFile(f types.File) bool {
+	minJs := viper.GetBool(constants.CONFIG_MINIFIED_JS_NAME)
+
+	if strings.HasSuffix(f.Name, ".js") {
+
+		if minJs {
+			if strings.Contains(f.Name, ".min.") {
+				return true
+			} else {
+				return false
+			}
+		}
+
+		return true
+	}
+
+	return false
+}
+
 func DeployFile(record types.Record, file types.File) (types.DeploySuccess, error) {
 	username := record.Username
 	password, err := encrypt.DecryptPassword(record.Password)
