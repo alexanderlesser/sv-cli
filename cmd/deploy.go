@@ -63,6 +63,7 @@ to quickly create a Cobra application.`,
 
 			var files []types.File
 			if deployJs {
+
 				f, err := helpers.GetJSFiles(record.Path)
 				files = f
 				if err != nil {
@@ -74,7 +75,6 @@ to quickly create a Cobra application.`,
 			} else {
 				f, err := helpers.GetCSSFiles(record.Path)
 				files = f
-				// files := helpers.GetCSSFiles(app, record.Path)
 
 				if err != nil {
 					app.Stop()
@@ -82,9 +82,8 @@ to quickly create a Cobra application.`,
 					os.Exit(1)
 				}
 			}
-			// fmt.Println(files)
-			components.GenerateGrid(app, grid, record, files, deployJs)
-			// generateGrid(app, grid, record, files)
+
+			components.GenerateGrid(app, grid, record, files, deployJs, startGulp)
 			pages.AddPage("grid", grid, true, false)
 			pages.SwitchToPage("grid")
 
@@ -101,7 +100,7 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(deployCmd)
-	recordCmd.Flags().BoolP("js", "", false, "Deploy javascript files")
+	deployCmd.Flags().BoolP("js", "j", false, "Deploy javascript files")
 
 	// Here you will define your flags and configuration settings.
 
