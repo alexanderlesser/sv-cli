@@ -199,7 +199,7 @@ func generateTextView(app *tview.Application) *tview.TextView {
 	return textView
 }
 
-func GenerateGrid(app *tview.Application, grid *tview.Grid, record types.Record, files []types.File, js bool) {
+func GenerateGrid(app *tview.Application, grid *tview.Grid, record types.Record, files []types.File, js bool, startGulp bool) {
 	tabIndex := 0
 
 	newPrimitive := func(text string) tview.Primitive {
@@ -278,13 +278,18 @@ func GenerateGrid(app *tview.Application, grid *tview.Grid, record types.Record,
 		SetColumns(30, 0, 30).
 		SetBorders(true)
 
-	txtView := generateTextView(app)
-	go runGulp(app, record.Path, txtView)
+	treeView := generateTreeView(record.Path)
 
-	rightMenu := txtView
+	rightMenu := treeView
 	leftMenu := list
 	header := newPrimitive("\n" + record.Name)
 	main := entryTable
+
+	txtView := generateTextView(app)
+
+	if startGulp {
+		go runGulp(app, record.Path, txtView)
+	}
 
 	grid.SetBorderColor(tcell.ColorGreen)
 
@@ -318,8 +323,13 @@ func GenerateGrid(app *tview.Application, grid *tview.Grid, record types.Record,
 	// Layout for screens wider than 100 cells.
 	grid.AddItem(&leftMenu, 1, 0, 1, 1, 0, 0, true).
 		AddItem(main, 1, 1, 1, 5, 0, 0, false).
-		AddItem(main, 1, 1, 1, 3, 0, 130, false).
-		AddItem(rightMenu, 1, 4, 1, 2, 0, 130, false)
+		AddItem(main, 1, 1, 1, 3, 0, 130, false)
+
+	if startGulp {
+		grid.AddItem(txtView, 1, 4, 1, 2, 0, 130, false)
+	} else {
+		grid.AddItem(rightMenu, 1, 4, 1, 2, 0, 130, false)
+	}
 
 	grid.AddItem(newPrimitive("\nTAB to navigate between screens"), 2, 0, 1, 2, 1, 1, false).
 		AddItem(newPrimitive("Foot 1"), 2, 2, 1, 2, 1, 1, false).
