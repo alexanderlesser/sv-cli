@@ -301,7 +301,11 @@ func GenerateGrid(app *tview.Application, grid *tview.Grid, record types.Record,
 				app.SetFocus(main)
 			} else if tabIndex == 1 {
 				tabIndex = 2
-				app.SetFocus(rightMenu)
+				if startGulp {
+					app.SetFocus(txtView)
+				} else {
+					app.SetFocus(rightMenu)
+				}
 			} else {
 				tabIndex = 0
 				app.SetFocus(&leftMenu)
