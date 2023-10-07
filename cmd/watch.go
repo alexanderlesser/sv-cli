@@ -1,5 +1,5 @@
 /*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
+Copyright © 2023 github.com/alexanderlesser
 */
 package cmd
 
@@ -12,7 +12,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -258,13 +257,9 @@ func watcher(app *tview.Application, textView *tview.TextView, record types.Reco
 					var isCorrectType bool
 
 					if js {
-						fmt.Fprintf(textView, "%s ", "\nname: "+file.Name)
 						isCorrectType = helpers.IsJsFile(file)
-						fmt.Fprintf(textView, "%s ", strconv.FormatBool(isCorrectType))
 					} else {
 						isCorrectType = helpers.IsCssFile(file)
-						fmt.Fprintf(textView, "%s ", "\nname: "+file.Name)
-						fmt.Fprintf(textView, "%s ", strconv.FormatBool(isCorrectType))
 					}
 
 					if isCorrectType {
@@ -301,8 +296,6 @@ func watcher(app *tview.Application, textView *tview.TextView, record types.Reco
 							}()
 						}
 					}
-
-					// deployFile(record, cssFile)
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
