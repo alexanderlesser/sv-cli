@@ -1,5 +1,5 @@
 /*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
+Copyright © 2023 github.com/alexanderlesser
 */
 package cmd
 
@@ -9,7 +9,6 @@ import (
 	"github.com/alexanderlesser/sv-cli/datastore"
 	"github.com/alexanderlesser/sv-cli/internal/components"
 
-	// "github.com/alexanderlesser/sv-cli/types"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"github.com/spf13/cobra"

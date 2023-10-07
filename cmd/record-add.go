@@ -1,3 +1,6 @@
+/*
+Copyright © 2023 github.com/alexanderlesser
+*/
 package cmd
 
 import (
