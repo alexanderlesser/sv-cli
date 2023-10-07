@@ -92,7 +92,6 @@ func InitializeConfig() {
 				os.Exit(1)
 			}
 
-			// viper.Set("encryption_bytes", encryptionBytes)
 			viper.Set(constants.ENCRYPTION_BYTES_NAME, fmt.Sprintf("%v", encryptedBytesStr))
 
 			// Save the configuration to the file
