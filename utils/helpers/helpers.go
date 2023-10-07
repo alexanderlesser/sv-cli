@@ -175,6 +175,8 @@ func IsJsFile(f types.File) bool {
 }
 
 func DeployFile(record types.Record, file types.File) (types.DeploySuccess, error) {
+
+	restPath := viper.GetString(constants.CONFIG_REST_API_NAME)
 	username := record.Username
 	password, err := encrypt.DecryptPassword(record.Password)
 
@@ -183,7 +185,7 @@ func DeployFile(record types.Record, file types.File) (types.DeploySuccess, erro
 	}
 
 	filePath := file.Path
-	routeURL := "https://" + record.Domain + "/rest-api/upload-css/upload"
+	routeURL := "https://" + record.Domain + "/" + restPath
 
 	// Read file content
 	content, err := os.ReadFile(filePath)
@@ -242,13 +244,11 @@ func DeployFile(record types.Record, file types.File) (types.DeploySuccess, erro
 	var response types.DeploySuccess
 
 	if resp.StatusCode == http.StatusOK {
-		// fmt.Println("Deployed successful")
 		response.Success = true
 		response.Entry = entry
 
 		return response, nil
 	} else {
-		// fmt.Println("Deploy failed")
 		response.Success = false
 		return response, nil
 	}

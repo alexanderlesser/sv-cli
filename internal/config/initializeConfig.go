@@ -79,6 +79,7 @@ func InitializeConfig() {
 
 			viper.Set(constants.CONFIG_CSS_NAME, "assets/css")
 			viper.Set(constants.CONFIG_JS_NAME, "assets/js")
+			viper.Set(constants.CONFIG_REST_API_NAME, "rest-api/upload-css/upload")
 			viper.Set(constants.CONFIG_MINIFIED_CSS_NAME, false)
 			viper.Set(constants.CONFIG_MINIFIED_JS_NAME, false)
 

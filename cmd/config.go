@@ -21,6 +21,7 @@ var configCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		cssVal := viper.GetString(constants.CONFIG_CSS_NAME)
 		jsVal := viper.GetString(constants.CONFIG_JS_NAME)
+		restVal := viper.GetString(constants.CONFIG_REST_API_NAME)
 		minCss := viper.GetBool(constants.CONFIG_MINIFIED_CSS_NAME)
 		minJs := viper.GetBool(constants.CONFIG_MINIFIED_JS_NAME)
 
@@ -28,18 +29,21 @@ var configCmd = &cobra.Command{
 		form := tview.NewForm().
 			AddInputField("CSS path", cssVal, 40, nil, nil).
 			AddInputField("Javascript path", jsVal, 40, nil, nil).
+			AddInputField("REST path", restVal, 40, nil, nil).
 			AddCheckbox("Only show minified css files", minCss, nil).
 			AddCheckbox("Only show minified javascript files", minJs, nil)
 
 		form.AddButton("Save", func() {
 			cssVal = form.GetFormItem(0).(*tview.InputField).GetText()
 			jsVal = form.GetFormItem(1).(*tview.InputField).GetText()
-			minCss = form.GetFormItem(2).(*tview.Checkbox).IsChecked()
-			minJs = form.GetFormItem(3).(*tview.Checkbox).IsChecked()
+			restVal = form.GetFormItem(2).(*tview.InputField).GetText()
+			minCss = form.GetFormItem(3).(*tview.Checkbox).IsChecked()
+			minJs = form.GetFormItem(4).(*tview.Checkbox).IsChecked()
 
-			if cssVal != "" && jsVal != "" {
+			if cssVal != "" && jsVal != "" && restVal != "" {
 				viper.Set(constants.CONFIG_CSS_NAME, cssVal)
 				viper.Set(constants.CONFIG_JS_NAME, jsVal)
+				viper.Set(constants.CONFIG_REST_API_NAME, restVal)
 				viper.Set(constants.CONFIG_MINIFIED_CSS_NAME, minCss)
 				viper.Set(constants.CONFIG_MINIFIED_JS_NAME, minJs)
 
