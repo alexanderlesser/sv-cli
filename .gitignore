@@ -23,3 +23,5 @@ go.work
 # config and data dev files
 config.yaml
 data.json
+
+dist/
