@@ -34,8 +34,26 @@ func getConfigDirPath() string {
 	return filepath.Join(homeDir, constants.CONFIG_DIR_NAME)
 }
 
+func ensureConfigDirExists(dirPath string) error {
+	// Check if the directory exists, create it if not
+	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+		err := os.MkdirAll(dirPath, 0700) // Adjust permissions as needed
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func createConfigFile(filePath string) error {
 	configContent := fmt.Sprintf("# %s\n%s: %s", constants.CONFIG_FILE_NAME, EncryptionKey, "")
+
+	// Create the config directory if it doesn't exist
+	dirPath := filepath.Dir(filePath)
+	if err := ensureConfigDirExists(dirPath); err != nil {
+		return err
+	}
+
 	return os.WriteFile(filePath, []byte(configContent), 0600)
 }
 

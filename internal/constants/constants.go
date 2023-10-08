@@ -2,10 +2,10 @@ package constants
 
 var DATASTORE_NAME = "data.json"
 var CONFIG_FILE_NAME = "config.yaml"
-var DEVELOPMENT = true
+var DEVELOPMENT = false
 
 const (
-	CONFIG_DIR_NAME          = ".sv-deploy"
+	CONFIG_DIR_NAME          = "sv-cli"
 	CONFIG_CSS_NAME          = "csspath"
 	CONFIG_JS_NAME           = "jspath"
 	CONFIG_REST_API_NAME     = "restpath"
