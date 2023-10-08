@@ -78,7 +78,7 @@ var watchCmd = &cobra.Command{
 				app.Draw()
 			})
 
-		textView.SetBorder(true)
+		textView.SetBorder(false)
 
 		table := components.DisplayRecordsTable(records, func(k tcell.Key) {
 			if k == tcell.KeyEscape {
@@ -200,11 +200,12 @@ func watcher(app *tview.Application, textView *tview.TextView, record types.Reco
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		fmt.Fprintf(textView, "%s ", "\nwatching: "+jsPath)
 		if watchFile != "" {
 			path = jsPath + "/" + watchFile
+			fmt.Fprintf(textView, "%s ", "\nwatching: "+jsPath+"/"+watchFile)
 		} else {
 			path = jsPath
+			fmt.Fprintf(textView, "%s ", "\nwatching: "+jsPath)
 		}
 
 	} else {
@@ -217,11 +218,11 @@ func watcher(app *tview.Application, textView *tview.TextView, record types.Reco
 
 		if watchFile != "" {
 			path = cssPath + "/" + watchFile
+			fmt.Fprintf(textView, "%s ", "\nwatching: "+cssPath+"/"+watchFile)
 		} else {
 			path = cssPath
+			fmt.Fprintf(textView, "%s ", "\nwatching: "+cssPath)
 		}
-
-		fmt.Fprintf(textView, "%s ", "\nwatching: "+cssPath)
 	}
 
 	// Create new watcher.
