@@ -45,8 +45,8 @@ archives:
 
 release:
   github:
-    owner: user
-    name: repo
+    owner: alexanderlesser
+    name: sv-cli
   draft: true
   replace_existing_draft: true
   name_template: "{{.ProjectName}}-v{{.Version}} {{.Env.USER}}"
